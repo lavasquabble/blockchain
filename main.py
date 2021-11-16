@@ -6,6 +6,10 @@ import csv
 from flask import Flask, request
 import requests
 
+import pymongo
+
+from pymongo import MongoClient
+
 from merkletree import get_merkle_tree_hash
 
 
@@ -63,8 +67,7 @@ class Blockchain:
     def addBlock(self, newBlock):
         previous_hash = self.getLatestBlock().hash
         if previous_hash != newBlock.previous_hash:
-            print(
-                f'not a valid_previous_hash {newBlock.previous_hash} != {previous_hash}')
+            print(f'not a valid_previous_hash {newBlock.previous_hash} != {previous_hash}')
             return False
         # if not self.is_valid_proof(newBlock, newBlock.proofOfWork(newBlock, self.difficulty)):
         #     print(f'not a valid_proof')
@@ -118,14 +121,26 @@ def get_chain():
         blockchain.addBlock(blockchain.createGenesisBlock(
             i+1, content, blockchain.getLatestBlock().hash))
 
+
+    db =  get_database()
+
     for i, block in enumerate(blockchain.chain):
         if i > 0:
             chain_data.append(block.__dict__)
+            save_data(db, block.__dict__)
 
     return json.dumps({"length": len(chain_data),
                        "chain": chain_data})
 
+def get_database():
 
+    CONNECTION_STRING = "mongodb+srv://admin:umindu12@cluster0.9iwkb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+
+    client = MongoClient(CONNECTION_STRING)
+    return client['myFirstDatabase']
+
+def save_data(db, data):
+    db.block_chain.insert_one(data)
 
 if __name__ == '__main__':
       app.run(port=5000)
