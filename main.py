@@ -3,6 +3,8 @@ import json
 import time
 import pandas as pd
 import csv
+
+from bson import json_util
 from flask import Flask, request
 import requests
 
@@ -43,6 +45,10 @@ class Block:
             block.nonce += 1
             calculatedHash = block.calculateHash()
         return calculatedHash
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)
 
 
 class Blockchain:
@@ -104,6 +110,8 @@ class Blockchain:
         self.raw_transactions.append(transaction)
 
 
+
+
 app = Flask(__name__)
 
 blockchain = Blockchain()
@@ -127,8 +135,8 @@ def get_chain():
     for i, block in enumerate(blockchain.chain):
         if i > 0:
             chain_data.append(block.__dict__)
-            save_data(db, block.__dict__)
 
+            save_data(db,  json.loads(json_util.dumps(block.__dict__)))
     return json.dumps({"length": len(chain_data),
                        "chain": chain_data})
 
