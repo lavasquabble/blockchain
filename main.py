@@ -140,6 +140,11 @@ def get_chain():
     return json.dumps({"length": len(chain_data),
                        "chain": chain_data})
 
+@app.route('/', methods=['GET'])
+def welcome():
+    return json.dumps({"data": "Welcome"})
+
+
 def get_database():
 
     CONNECTION_STRING = "mongodb+srv://admin:umindu12@cluster0.9iwkb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
